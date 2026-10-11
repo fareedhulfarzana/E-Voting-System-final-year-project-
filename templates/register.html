@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Registration</title>
+    <link rel="stylesheet" href="styles.cs">
+    <style>
+       body {
+    font-family: Arial, sans-serif;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Keeps form centered */
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 0; /* Adds space around the form */
+    margin-bottom:50px;
+    padding-top:-50px;
+}
+
+.container {
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+    width: 850px;
+    max-width: 90%;
+    text-align: center;
+    color: white;
+    margin-top: 750px; /* Moves form slightly down */
+    
+    
+}
+
+input, button {
+    width: 90%;
+    margin-bottom: 10px;
+}
+
+button {
+    background: green;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Ensure button is always accessible */
+button {
+    bottom: 10px;
+    background: green;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+        h2 {
+            color: #00ff00;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        input {
+            width: 95%;
+            padding: 12px;
+            font-size: 16px; /* Make text inside input more readable */
+            margin-top: 5px;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            background: #222;
+            color: white;
+        }
+        button {
+            background: #00ff00;
+            color: black;
+            border: none;
+            padding: 12px;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #009900;
+        }
+        p {
+            margin-top: 15px;
+            color: #00ff00;
+        }
+        a {
+            color: #00ff00;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        /* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #111;
+    padding: 15px 40px;
+    box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+     overflow: visible !important;
+       width: 100vw;
+    overflow: visible;
+     
+}
+
+.navbar .logo img {
+    width: 100px; /* Adjust logo size */
+}
+
+.navbar .menu {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+        flex-wrap: wrap;
+        margin-right:100px;
+
+    
+}
+
+.navbar .menu li {
+    display: inline;
+        white-space: nowrap; /* Prevents text from breaking into multiple lines */
+
+}
+
+
+.navbar .menu li a {
+    color: #00ff00;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    transition: 0.3s;
+    
+}
+
+.navbar .menu li a:hover {
+    background: #009900;
+    border-radius: 5px;
+}
+
+    </style>
+    <script>
+    function sendOTP() {
+        let phone = document.getElementById("phoneNumber").value;
+        
+        if (!phone) {
+            alert("Please enter a phone number.");
+            return;
+        }
+
+        fetch("/send_otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "phoneNumber=" + encodeURIComponent(phone)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+</script>
+<script>
+    function verifyOTP() {
+        let otp = document.getElementById("otp").value;
+        let phone = document.getElementById("phoneNumber").value;
+
+        fetch("/verify_otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phoneNumber: phone, otp: otp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);  // ✅ Show success message
+            } else {
+                alert("Error: " + data.error);  // ❌ Show error message
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+</script>
+<script>
+    let otpVerified = false;
+
+    function sendOTP() {
+        let phone = document.getElementById("phoneNumber").value;
+
+        if (!phone) {
+            alert("Please enter a phone number.");
+            return;
+        }
+
+        fetch("/send_otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "phoneNumber=" + encodeURIComponent(phone)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function verifyOTP() {
+        let otp = document.getElementById("otp").value;
+        let phone = document.getElementById("phoneNumber").value;
+
+        fetch("/verify_otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phoneNumber: phone, otp: otp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                otpVerified = true;
+                document.getElementById("registerBtn").disabled = false;  // Enable Register button
+            } else {
+                alert("Error: " + data.error);
+                otpVerified = false;
+                document.getElementById("registerBtn").disabled = true;  // Keep Register button disabled
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    document.getElementById("registerForm").addEventListener("submit", function(event) {
+        if (!otpVerified) {
+            event.preventDefault();  // Stop form submission
+            alert("Please enter a valid OTP before registering.");
+        }
+    });
+</script>
+
+<script>
+    let otpVerified = false;
+
+    function sendOTP() {
+        let phone = document.getElementById("phoneNumber").value;
+
+        if (!phone) {
+            alert("Please enter a phone number.");
+            return;
+        }
+
+        fetch("/send_otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "phoneNumber=" + encodeURIComponent(phone)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function verifyOTP() {
+        let otp = document.getElementById("otp").value;
+        let phone = document.getElementById("phoneNumber").value;
+
+        fetch("/verify_otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phoneNumber: phone, otp: otp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                otpVerified = true;
+                document.getElementById("registerBtn").disabled = false;  // Enable Register button
+            } else {
+                alert("Error: " + data.error);
+                otpVerified = false;
+                document.getElementById("registerBtn").disabled = true;  // Keep Register button disabled
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+</script>
+<script>
+document.getElementById("first_name").addEventListener("input", function () {
+    this.value = this.value.replace(/[^A-Za-z]/g, '');
+});
+
+document.getElementById("last_name").addEventListener("input", function () {
+    this.value = this.value.replace(/[^A-Za-z]/g, '');
+});
+
+document.getElementById("aadhaar_id").addEventListener("input", function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+    if (this.value.length > 12) {
+        alert("Aadhaar ID must be exactly 12 digits.");
+        this.value = this.value.slice(0, 12);
+    }
+});
+
+document.getElementById("voter_id").addEventListener("input", function () {
+    this.value = this.value.replace(/[^A-Za-z0-9]/g, '');
+    if (this.value.length > 10) {
+        alert("Voter ID must be exactly 10 characters (letters and digits).");
+        this.value = this.value.slice(0, 10);
+    }
+});
+</script>
+
+
+</head>
+<!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="party/logo.png">
+        </div>
+        <ul class="menu">
+            <li><a href="{{ url_for('dashboard') }}">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('result_page') }}">Results</a></li>
+            <li><a href="{{ url_for('admins_page') }}">Admin</a></li>
+        </ul>
+    </nav>
+<body>
+    <div class="container">
+        <h2>Voter Registration</h2>
+        <form id="registerForm" action="/" method="POST" enctype="multipart/form-data">
+         <label for="first_name">First Name:</label>
+    <input type="text" id="first_name" name="first_name" required>
+    <label for="last_name">Last Name:</label>
+    <input type="text" id="last_name" name="last_name" required>
+    <label for="voterId">Voter ID:</label>
+    <input type="text" id="voterId" name="voterId" required maxlength="10">
+    <label for="aadhaar_id">Aadhaar ID:</label>
+    <input type="text" id="aadhaar_id" name="aadhaar_id" required maxlength="12">
+
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="text" id="phoneNumber" name="phoneNumber" required>
+    <button type="button" onclick="sendOTP()">Send OTP</button>
+
+    <label for="otp">Enter OTP:</label>
+    <input type="text" id="otp" name="otp" required>
+    <button type="button" onclick="verifyOTP()">Verify OTP</button>
+
+    <label for="aadhaarCard">Upload Aadhaar Card:</label>
+    <input type="file" id="aadhaarCard" name="aadhaarCard" accept="image/*" required>
+
+    <button type="submit" id="registerBtn" disabled>Register</button>
+</form>
+
+        <p>Already registered? <a href="{{ url_for('login') }}">Login here</a></p>
+        <a href="{{ url_for('result_page') }}" class="btn btn-primary">View Results</a>
+        <a href="{{ url_for('admins_page') }}" class="admin-link">Admin Panel</a>
+
+
+    </div>
+
+    
+</body>
+</html>

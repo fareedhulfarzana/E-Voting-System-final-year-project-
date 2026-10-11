@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+    /* Global Styles */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: black; /* Full black background */
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+        flex-direction: column;
+        margin-top:200px;
+        margin-bottom:50px;
+    }
+
+    .container {
+        background: #111;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+        max-width: 800px; /* Increased width for better alignment */
+        width: 100%;
+        text-align: center;
+    }
+
+    h2, h1 {
+        color: #00ff00; /* Green for headings */
+    }
+
+    label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+        color: #00ff00;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #00ff00;
+        border-radius: 5px;
+        background: #222;
+        color: white;
+    }
+
+    button {
+        background: #00ff00;
+        color: black;
+        border: none;
+        padding: 10px;
+        margin-top: 10px;
+        width: 100%;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: #009900;
+    }
+
+    p {
+        margin-top: 15px;
+        color: #00ff00;
+    }
+
+    a {
+        color: #00ff00;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    a:hover {
+        color: #009900;
+    }
+
+    /* Admin Panel Specific Styles */
+    h1 {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    form label {
+        text-align: left;
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    form input[type="text"], form input[type="file"] {
+        width: 80%;
+    }
+
+    form button {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    /* Table Styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    table th, table td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #444;
+    }
+
+    table th {
+        background-color: #333;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #444;
+    }
+
+    table img {
+        border-radius: 5px;
+    }
+
+    /* Timer and Video Styling for Voting Page */
+    #timer {
+        font-size: 20px;
+        margin-top: 10px;
+        color: #00ff00;
+    }
+
+    #video {
+        margin-top: 20px;
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+    }
+
+    #canvas {
+        display: none;
+    }
+</style>
+    <style>
+     /* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #111;
+    padding: 15px 40px;
+    box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+     overflow: visible !important;
+       width: 100vw;
+    overflow: visible;
+     
+}
+
+.navbar .logo img {
+    width: 100px; /* Adjust logo size */
+}
+
+.navbar .menu {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+        flex-wrap: wrap;
+        margin-right:100px;
+
+    
+}
+
+.navbar .menu li {
+    display: inline;
+        white-space: nowrap; /* Prevents text from breaking into multiple lines */
+
+}
+
+
+.navbar .menu li a {
+    color: #00ff00;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    transition: 0.3s;
+    
+}
+
+.navbar .menu li a:hover {
+    background: #009900;
+    border-radius: 5px;
+}
+    </style>
+
+    <script>
+        let otpVerified = false;
+
+        function sendLoginOTP() {
+            let phone = document.getElementById("phoneNumber").value;
+            let voterId = document.getElementById("voterId").value;
+
+            if (!phone || !voterId) {
+                alert("Please enter Voter ID and Phone Number.");
+                return;
+            }
+
+            fetch("/send_login_otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "voterId=" + encodeURIComponent(voterId) + "&phoneNumber=" + encodeURIComponent(phone)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);  // ✅ Show success message
+                } else {
+                    alert("Error: " + data.error);  // ❌ Show error message
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function verify_login_otp() {
+            let otp = document.getElementById("otp").value;
+            let phone = document.getElementById("phoneNumber").value;
+
+            if (!otp || !phone) {
+                alert("Please enter OTP and phone number.");
+                return;
+            }
+
+            fetch("/verify_login_otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phoneNumber: phone, otp: otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);  // ✅ Show success message
+                    otpVerified = true;
+                    document.getElementById("loginBtn").disabled = false;  // Enable Login button
+                } else {
+                    alert("Error: " + data.error);
+                    otpVerified = false;
+                    document.getElementById("loginBtn").disabled = true;  // Keep Login button disabled
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function redirectToVotingPage(event) {
+            if (!otpVerified) {
+                event.preventDefault();  // ❌ Stop form submission if OTP is not verified
+                alert("Please verify OTP before logging in.");
+            } else {
+                window.location.href = "/voting_page";  // ✅ Redirect to voting page
+            }
+        }
+    </script>
+    <script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        fetch("/login", {
+            method: "POST",
+            body: new FormData(this)
+        }).then(response => response.text())
+          .then(data => {
+              if (data.includes("Invalid OTP")) {
+                  alert("Incorrect OTP! Try again.");
+              } else {
+                  window.location.href = "/voting_page"; // Redirect to voting page
+              }
+          });
+    });
+</script>
+
+
+</head>
+<!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="party/logo.png">
+        </div>
+        <ul class="menu">
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('result_page') }}">Results</a></li>
+            <li><a href="{{ url_for('admins_page') }}">Admin</a></li>
+        </ul>
+    </nav>
+<body>
+    <div class="container">
+        <h2>Voter Login</h2>
+<form id="loginForm" action="{{ url_for('login') }}" method="POST">
+            <label for="voterId">Voter ID:</label>
+            <input type="text" id="voterId" name="voterId" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="text" id="phoneNumber" name="phoneNumber" required>
+            <button type="button" onclick="sendLoginOTP()">Send OTP</button>
+
+            <label for="otp">Enter OTP:</label>
+            <input type="text" id="otp" name="otp" required>
+            <button type="button" onclick="verify_login_otp()">Verify OTP</button>
+
+            <!-- ✅ Ensure the login button redirects to voting page only after OTP verification -->
+            <button type="submit" id="loginBtn" disabled>Login</button>
+
+        </form>
+        <p>Not registered yet? <a href="{{ url_for('register') }}">Register here</a></p>
+    </div>
+
+</body>
+</html>

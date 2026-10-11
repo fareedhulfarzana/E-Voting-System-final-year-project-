@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+     <style>
+     /* Global Styles */
+     body {
+         font-family: Arial, sans-serif;
+         background-color: black; /* Full black background */
+         margin: 0;
+         padding: 0;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         height: 100vh;
+         color: white;
+         flex-direction: column;
+         margin-top:200px;
+         margin-bottom:50px;
+     }
+
+     .container {
+         background: #111;
+         padding: 20px;
+         border-radius: 10px;
+         box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+         max-width: 800px; /* Increased width for better alignment */
+         width: 100%;
+         text-align: center;
+     }
+
+     h2, h1 {
+         color: #00ff00; /* Green for headings */
+     }
+
+     label {
+         display: block;
+         margin-top: 10px;
+         font-weight: bold;
+         color: #00ff00;
+     }
+
+     input, select {
+         width: 100%;
+         padding: 8px;
+         margin-top: 5px;
+         border: 1px solid #00ff00;
+         border-radius: 5px;
+         background: #222;
+         color: white;
+     }
+
+     button {
+         background: #00ff00;
+         color: black;
+         border: none;
+         padding: 10px;
+         margin-top: 10px;
+         width: 100%;
+         border-radius: 5px;
+         cursor: pointer;
+         font-weight: bold;
+     }
+
+     button:hover {
+         background: #009900;
+     }
+
+     p {
+         margin-top: 15px;
+         color: #00ff00;
+     }
+
+     a {
+         color: #00ff00;
+         text-decoration: none;
+         font-weight: bold;
+     }
+
+     a:hover {
+         color: #009900;
+     }
+
+     /* Admin Panel Specific Styles */
+     h1 {
+         text-align: center;
+         margin-bottom: 40px;
+     }
+
+     form {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+     }
+
+     form label {
+         text-align: left;
+         width: 100%;
+         margin-bottom: 5px;
+     }
+
+     form input[type="text"], form input[type="file"] {
+         width: 80%;
+     }
+
+     form button {
+         width: 100%;
+         margin-top: 20px;
+     }
+
+     /* Table Styles */
+     table {
+         width: 100%;
+         border-collapse: collapse;
+         margin-top: 20px;
+     }
+
+     table th, table td {
+         padding: 10px;
+         text-align: center;
+         border: 1px solid #444;
+     }
+
+     table th {
+         background-color: #333;
+     }
+
+     table tr:nth-child(even) {
+         background-color: #444;
+     }
+
+     table img {
+         border-radius: 5px;
+     }
+
+     /* Timer and Video Styling for Voting Page */
+     #timer {
+         font-size: 20px;
+         margin-top: 10px;
+         color: #00ff00;
+     }
+
+     #video {
+         margin-top: 20px;
+         width: 100%;
+         max-width: 400px;
+         height: auto;
+     }
+
+     #canvas {
+         display: none;
+     }
+ </style>
+    <style>
+     /* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #111;
+    padding: 15px 40px;
+    box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+     overflow: visible !important;
+       width: 100vw;
+    overflow: visible;
+     
+}
+
+.navbar .logo img {
+    width: 100px; /* Adjust logo size */
+}
+
+.navbar .menu {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+        flex-wrap: wrap;
+        margin-right:100px;
+
+    
+}
+
+.navbar .menu li {
+    display: inline;
+        white-space: nowrap; /* Prevents text from breaking into multiple lines */
+
+}
+
+
+.navbar .menu li a {
+    color: #00ff00;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    transition: 0.3s;
+    
+}
+
+.navbar .menu li a:hover {
+    background: #009900;
+    border-radius: 5px;
+}
+    </style>
+</head>
+<!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="party/logo.png">
+        </div>
+        <ul class="menu">
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('result_page') }}">Results</a></li>
+            <li><a href="{{ url_for('admins_page') }}">Admin</a></li>
+        </ul>
+    </nav>
+<body>
+    <div class="container">
+        <h2>Cast Your Vote</h2>
+        <p id="timer">Time Left: 5:00</p>
+        <video id="video" width="400" height="300" autoplay></video>
+
+        {% if expiry_time %}
+            <p>Voting session expires in: {{ expiry_time - time.time() }} seconds</p>
+        {% endif %}
+        
+        <form id="voteForm" action="/submit_vote" method="POST" enctype="multipart/form-data">
+            <label>Select Your Party:</label>
+            <select id="candidate" name="candidate" required>
+                <option value="AIADMK(All India Anna Dravida Munnetra Kazhagam)">AIADMK(All India Anna Dravida Munnetra Kazhagam)</option>
+                <option value="DMK(Dravida Munnetra Kazhagam)">DMK(Dravida Munnetra Kazhagam)</option>
+                <option value="CPI(Communist Party of India)">CPI(Communist Party of India)</option>
+                <option value="DMDK(Desiya Murpokku Dravida Kazhagam)">DMDK(Desiya Murpokku Dravida Kazhagam)</option>
+                <option value="NTK(Naam Tamilar Katchi)">NTK(Naam Tamilar Katchi)</option>
+                <option value="VCK(Viduthalai Chiruthaigal Katchi)">VCK(Viduthalai Chiruthaigal Katchi)</option>
+                <option value="AAP(Aam Aadmi Party)">AAP(Aam Aadmi Party)</option>
+                <option value="BSP(Bahujan Samaj Party)">BSP(Bahujan Samaj Party)</option>
+                <option value="BJP(Bharatiya Janata Party)">BJP(Bharatiya Janata Party)</option>
+                <option value="INC(Indian National Congress)">INC(Indian National Congress)</option>
+            </select>
+            <button type="submit">Submit Vote</button>
+        </form>
+    </div>
+    
+    <script>
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+  .then(stream => {
+    let mediaRecorder = new MediaRecorder(stream);
+    let chunks = [];
+
+    mediaRecorder.ondataavailable = event => {
+      chunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      let blob = new Blob(chunks, { type: 'video/mp4' });
+      let formData = new FormData();
+      
+      let voterID = document.getElementById("voter_id").value;  // Get voter ID from form
+      let timestamp = Date.now();
+      let videoFilename = `${voterID}_${timestamp}.mp4`; // Unique filename
+      
+      formData.append("video", blob, videoFilename);  // Send video with filename
+      formData.append("voter_id", voterID);  // Also send voter ID
+
+      fetch("/submit_vote", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+      })
+      .catch(error => {
+        console.error("Error:", error);
+      });
+    };
+
+    mediaRecorder.start();
+    
+    setTimeout(() => {
+      mediaRecorder.stop();
+    }, 5000); // Record for 5 seconds
+  })
+  .catch(error => {
+    console.error("Error accessing webcam:", error);
+  });
+  </script>
+
+    <script>
+        let timeLeft = {% if expiry_time %} {{ expiry_time - time.time() }} {% else %} 300 {% endif %}; // Default 5 minutes
+
+        function updateTimer() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = Math.floor(timeLeft % 60);
+            document.getElementById("timer").textContent = `Time Left: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                alert("Your time has ended. Redirecting...");
+                window.location.href = "/logout";
+            } else {
+                timeLeft--;
+            }
+        }
+        let interval = setInterval(updateTimer, 1000);
+    </script>
+
+    <script>
+        let video = document.getElementById("video");
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                video.srcObject = stream;
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => recordedChunks.push(event.data);
+                mediaRecorder.start();
+            })
+            .catch(err => {
+                console.error("Camera access denied:", err);
+                alert("Camera access is required for voting.");
+            });
+
+        // Stop recording & submit form
+        document.getElementById("voteForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Stop form submission
+            if (mediaRecorder) mediaRecorder.stop();
+            mediaRecorder.onstop = () => {
+                let blob = new Blob(recordedChunks, { type: "video/webm" });
+                let formData = new FormData(this);
+                formData.append("video", blob, "recording.webm");
+
+                fetch("/submit_vote", { method: "POST", body: formData })
+                    .then(response => response.text())
+                    .then(data => {
+                        alert("Vote submitted successfully!");
+                        window.location.href = "/logout";
+                    })
+                    .catch(error => console.error("Error submitting vote:", error));
+            };
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Feb  7 09:11:24 2025
+
+@author: farzu
+"""
+body {
+    font-family: Arial, sans-serif;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.container {
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+    width: 350px;
+    text-align: center;
+    color: white;
+}
+h2 {
+    color: #00ff00;
+}
+input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #00ff00;
+    border-radius: 5px;
+    background: #222;
+    color: white;
+}
+button {
+    background: #00ff00;
+    color: black;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button:hover {
+    background: #009900;
+}
+
+

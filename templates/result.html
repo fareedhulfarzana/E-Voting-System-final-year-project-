@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results</title>
+    <style>
+     /* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #111;
+    padding: 15px 40px;
+    box-shadow: 0px 4px 10px rgba(0, 255, 0, 0.5);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+     overflow: visible !important;
+       width: 100vw;
+    overflow: visible;
+     
+}
+
+.navbar .logo img {
+    width: 100px; /* Adjust logo size */
+}
+
+.navbar .menu {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+        flex-wrap: wrap;
+        margin-right:100px;
+
+    
+}
+
+.navbar .menu li {
+    display: inline;
+        white-space: nowrap; /* Prevents text from breaking into multiple lines */
+
+}
+
+
+.navbar .menu li a {
+    color: #00ff00;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    transition: 0.3s;
+    
+}
+
+.navbar .menu li a:hover {
+    background: #009900;
+    border-radius: 5px;
+}</style>
+    <style>
+        body {
+            background-color: black;
+            color: green;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top:200px;
+            margin-bottom:50px;
+        }
+        h1 {
+            color: limegreen;
+        }
+        table {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #1a1a1a;
+        }
+        th, td {
+            border: 1px solid green;
+            padding: 10px;
+            text-align: center;
+            color:white;
+        }
+        th {
+            background-color: darkgreen;
+            color:white;
+        }
+        .lead {
+            font-size: 1.2em;
+            color: limegreen;
+            margin-top: 20px;
+        }
+        .voter-choice {
+            font-size: 1.1em;
+            color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="party/logo.png">
+        </div>
+        <ul class="menu">
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('result_page') }}">Results</a></li>
+            <li><a href="{{ url_for('admins_page') }}">Admin</a></li>
+        </ul>
+    </nav>
+<body>
+    <h1>Election Results</h1>
+
+    <!-- Voter's Choice -->
+    {% if voter_choice %}
+    <div class="voter-choice">
+        {{ voter_name }} ({{ voter_id }}) voted for {{ voter_choice }}
+    </div>
+    {% endif %}
+
+    <!-- Table displaying vote counts and percentages -->
+   <table border="1">
+    <tr>
+        <th>parties</th>
+        <th>Vote Count</th>
+    </tr>
+    {% for candidate, count in results.items() %}
+    <tr>
+        <td>{{ candidate }}</td>
+        <td>{{ count }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if leading_candidate %}
+<h2>🏆 Leading party: {{ leading_candidate[0] }} with {{ leading_candidate[1] }} votes!</h2>
+{% else %}
+<h2>No votes have been cast yet.</h2>
+{% endif %}
+</body>
+</html>
